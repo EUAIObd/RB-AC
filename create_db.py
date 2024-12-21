@@ -22,16 +22,17 @@ class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    is_main_admin = db.Column(db.Boolean, default=False)
 
 # --- Create Database and Tables ---
 def create_database():
     with app.app_context():  # Create an application context
-        db.create_all()
+        #db.create_all()
 
         # --- Optionally add an initial admin user ---
         try:
-            hashed_password = generate_password_hash("aa")  # Replace with a secure password
-            admin = Admin(name="admin", password=hashed_password)
+            hashed_password = generate_password_hash("wq")
+            admin = Admin(name="wq", password=hashed_password, is_main_admin=True)  # Set to True
             db.session.add(admin)
             db.session.commit()
             print("Initial admin user created.")

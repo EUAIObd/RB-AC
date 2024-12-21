@@ -8,12 +8,18 @@
     <form method="POST" autocomplete="off">
         <div class="form-group">
             <label for="name">Admin Name:</label>
-            <input type="text" id="name" name="name" class="form-control" required>
+            <input type="text" id="name" name="name" class="form-control" required autocomplete="off">
         </div>
         <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" class="form-control" required>
+            <input type="password" id="password" name="password" class="form-control" required autocomplete="off">
         </div>
+        {% if current_user.is_main_admin %}
+            <div class="form-group">
+                <input type="checkbox" id="is_main_admin" name="is_main_admin">
+                <label for="is_main_admin">Make this a main admin</label>
+            </div>
+        {% endif %}
         <button type="submit" class="btn btn-primary">Create</button>
     </form>
 {% endblock %}

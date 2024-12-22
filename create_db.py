@@ -27,12 +27,12 @@ class Admin(db.Model):
 # --- Create Database and Tables ---
 def create_database():
     with app.app_context():  # Create an application context
-        #db.create_all()
+        # db.create_all()
 
         # --- Optionally add an initial admin user ---
         try:
-            hashed_password = generate_password_hash("wq")
-            admin = Admin(name="wq", password=hashed_password, is_main_admin=True)  # Set to True
+            hashed_password = generate_password_hash("adminPassword123")
+            admin = Admin(name="mainadmin", password=hashed_password, is_main_admin=True)  # Set to True
             db.session.add(admin)
             db.session.commit()
             print("Initial admin user created.")

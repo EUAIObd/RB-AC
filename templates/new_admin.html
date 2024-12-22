@@ -2,7 +2,7 @@
 
 {% block content %}
 <a href="{{ url_for('admin_dashboard') }}" class="back-arrow">
-    <i class="fas fa-arrow-left"></i> Back
+    <i class="fas fa-arrow-left"></i>
 </a>
     <h2>Create New Admin</h2>
     <form method="POST" autocomplete="off">
@@ -12,7 +12,14 @@
         </div>
         <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" class="form-control" required autocomplete="off">
+            <div class="input-group">
+                <input type="password" id="password" name="password" class="form-control" required autocomplete="off">
+                <div class="input-group-append">
+                    <button type="button" id="togglePassword" class="btn btn-outline-secondary">
+                        <i id="password-icon" class="password-icon fa fa-eye-slash"></i> </button>
+                </div>
+            </div>
+            <div id="password-strength"></div>
         </div>
         {% if current_user.is_main_admin %}
             <div class="form-group">
@@ -22,4 +29,40 @@
         {% endif %}
         <button type="submit" class="btn btn-primary">Create</button>
     </form>
+    <script>
+        const passwordInput = document.getElementById('password');
+        const strengthMeter = document.getElementById('password-strength');
+    
+        passwordInput.addEventListener('input', function() {
+            const password = passwordInput.value;
+            const result = zxcvbn(password);
+            const strength = result.score; // 0 (weak) to 4 (strong)
+    
+            // Update the strength meter (you can customize this part)
+            switch (strength) {
+                case 0:
+                    strengthMeter.textContent = 'Very Weak';
+                    strengthMeter.style.color = 'red';
+                    break;
+                case 1:
+                    strengthMeter.textContent = 'Weak';
+                    strengthMeter.style.color = 'orange';
+                    break;
+                case 2:
+                    strengthMeter.textContent = 'Fair';
+                    strengthMeter.style.color = 'yellow';
+                    break;
+                case 3:
+                    strengthMeter.textContent = 'Good';
+                    strengthMeter.style.color = 'blue';
+                    break;
+                case 4:
+                    strengthMeter.textContent = 'Strong';
+                    strengthMeter.style.color = 'green';
+                    break;
+                default:
+                    strengthMeter.textContent = '';
+            }
+        });
+    </script>
 {% endblock %}

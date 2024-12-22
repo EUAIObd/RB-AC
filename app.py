@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_very_secret_key'  # Replace with a real secret key
@@ -30,6 +31,48 @@ class Admin(db.Model, UserMixin):
     name = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     is_main_admin = db.Column(db.Boolean, default=False)  # Add this field
+
+#validate Password
+
+def validate_password(password):
+    """
+    Validates password complexity.
+
+    Args:
+        password: The password to validate.
+
+    Returns:
+        True if the password meets the criteria, False otherwise.
+    """
+
+    if len(password) < 8:
+        flash('Password must be at least 8 characters long.', 'danger')
+        return False
+
+    if not re.search("[a-z]", password):
+        flash('Password must contain at least one lowercase letter.', 'danger')
+        return False
+
+    if not re.search("[A-Z]", password):
+        flash('Password must contain at least one uppercase letter.', 'danger')
+        return False
+
+    if not re.search("[0-9]", password):
+        flash('Password must contain at least one digit.', 'danger')
+        return False
+
+    if not re.search("[!@#$%^&*(),.?\":{}|<>]", password):
+        flash('Password must contain at least one special character.', 'danger')
+        return False
+
+    # Optional: Check against a list of common passwords
+    # with open("common_passwords.txt", "r") as f:
+    #     common_passwords = [line.strip() for line in f]
+    #     if password in common_passwords:
+    #         flash('Password is too common. Please choose a different one.', 'danger')
+    #         return False
+
+    return True
 
 # --- User Loader for Flask-Login ---
 
@@ -72,7 +115,7 @@ def login():
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if request.method == 'GET':  # Add Cache-Control headers for GET requests
+    if request.method == 'GET':
         response = make_response(render_template('signup.html'))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
@@ -85,19 +128,27 @@ def signup():
         address = request.form['address']
         cellphone = request.form['cellphone']
         password = request.form['password']
-        hashed_password = generate_password_hash(password)
 
+        # Validate password complexity
+        if not validate_password(password):
+            return render_template('signup.html')  # Stay on the signup page
+
+        hashed_password = generate_password_hash(password)
         new_user = User(name=name, email=email, address=address, cellphone=cellphone, password=hashed_password, profile_pic='defaultpic.png')
         db.session.add(new_user)
         db.session.commit()
 
         flash('Account created successfully!', 'success')
         return redirect(url_for('login'))
+
     return render_template('signup.html')
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    if not current_user.is_authenticated:
+        flash('Access denied. Please log in.', 'danger')
+        return redirect(url_for('login'))
     if request.method == 'POST':
         current_user.name = request.form['name']
         current_user.email = request.form['email']
@@ -120,6 +171,7 @@ def profile():
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     return response
+
 
 
 @app.route('/logout')
@@ -205,6 +257,11 @@ def new_admin():
         name = request.form['name']
         password = request.form['password']
 
+        # Validate password complexity
+        if not validate_password(password):
+            return render_template('new_admin.html')  # Stay on the new_admin page
+
+
         # Check if admin name already exists
         existing_admin = Admin.query.filter_by(name=name).first()
         if existing_admin:
@@ -283,10 +340,53 @@ def delete_secondary_admin(admin_id):
     flash('Secondary admin deleted successfully!', 'success')
     return redirect(url_for('admin_dashboard'))
 
+# @app.route('/change_password', methods=['GET', 'POST'])
+# @login_required
+# def change_password():
+#     if request.method == 'POST':
+#         old_password = request.form['old_password']
+#         new_password = request.form['new_password']
+#         confirm_new_password = request.form['confirm_new_password']
+
+#         # Check if old password is correct
+#         if not check_password_hash(current_user.password, old_password):
+#             flash('Incorrect old password.', 'danger')
+#             return render_template('change_password.html')
+
+#         # Check if new password and confirmation match
+#         if new_password != confirm_new_password:
+#             flash('New passwords do not match.', 'danger')
+#             return render_template('change_password.html')
+
+#         # Update the password
+#         current_user.password = generate_password_hash(new_password)
+#         db.session.commit()
+
+#         flash('Password changed successfully!', 'success')
+#         # Redirect to profile or admin dashboard based on user type
+#         if isinstance(current_user, Admin):
+#             return redirect(url_for('admin_dashboard'))
+#         else:
+#             return redirect(url_for('profile'))
+
+#     return render_template('change_password.html')
+
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
-    if request.method == 'POST':
+    # Determine the correct back URL
+    if isinstance(current_user, Admin):
+        back_url = url_for('admin_dashboard')
+    else:
+        back_url = url_for('profile')
+
+    if request.method == 'GET':
+        response = make_response(render_template('change_password.html', back_url=back_url))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+    elif request.method == 'POST':
         old_password = request.form['old_password']
         new_password = request.form['new_password']
         confirm_new_password = request.form['confirm_new_password']
@@ -294,26 +394,28 @@ def change_password():
         # Check if old password is correct
         if not check_password_hash(current_user.password, old_password):
             flash('Incorrect old password.', 'danger')
-            return render_template('change_password.html')
+            return render_template('change_password.html', back_url=back_url)
 
         # Check if new password and confirmation match
         if new_password != confirm_new_password:
             flash('New passwords do not match.', 'danger')
-            return render_template('change_password.html')
+            return render_template('change_password.html', back_url=back_url)
+
+        # Validate password complexity
+        if not validate_password(new_password):
+            return render_template('change_password.html', back_url=back_url)
 
         # Update the password
         current_user.password = generate_password_hash(new_password)
         db.session.commit()
 
         flash('Password changed successfully!', 'success')
-        # Redirect to profile or admin dashboard based on user type
+        # Redirect based on user type
         if isinstance(current_user, Admin):
             return redirect(url_for('admin_dashboard'))
         else:
             return redirect(url_for('profile'))
-
-    return render_template('change_password.html')
-
+        
 @app.route('/update_profile_pic', methods=['POST'])
 @login_required
 def update_profile_pic():

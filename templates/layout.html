@@ -3,6 +3,8 @@
 <head>
     <title>Access Control App</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -285,6 +287,43 @@
     .back-arrow i {
         margin-right: 5px; /* Space between icon and text */
     }
+
+    .input-group-append .btn-outline-secondary:hover {
+        /* Slightly darker background on hover */
+        background-color: #e9ecef;
+        /* Slightly darker border color on hover */
+        border-color: #ced4da;
+    }
+        .input-group-text.password-toggle-icon {
+            background-color: transparent;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            cursor: pointer;
+            border-radius: 0;
+            border: 1px solid #ced4da;
+            border-left: none;
+        }
+
+        /* Style for the Font Awesome eye icon */
+        .password-toggle-icon i {
+            color: #495057;
+            transition: color 0.2s ease-in-out;
+        }
+
+        /* Hover effect for the icon */
+        .password-toggle-icon:hover i {
+            color: #3498db;
+        }
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        /* Style for the password toggle icon container */
+        .input-group .password-toggle-icon {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
     </style>
 </head>
 <body>
@@ -302,4 +341,35 @@
         {% block content %}{% endblock %}
     </div>
 </body>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to toggle password visibility
+            function togglePasswordVisibility(passwordField, icon) {
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                // Toggle the eye icon
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+
+            // Get all password fields
+            const passwordFields = document.querySelectorAll('input[type="password"]');
+
+            // Attach event listeners to password fields
+            passwordFields.forEach(passwordField => {
+                // Construct the ID of the toggle button based on the password field's ID
+                const toggleButtonId = `toggle${passwordField.id.charAt(0).toUpperCase() + passwordField.id.slice(1)}`;
+                const toggleButton = document.getElementById(toggleButtonId);
+
+                // Check if the toggle button exists
+                if (toggleButton) {
+                    const icon = toggleButton.querySelector('i');
+                    // Attach event listener to the toggle button
+                    toggleButton.addEventListener('click', function() {
+                        togglePasswordVisibility(passwordField, icon);
+                    });
+                }
+            });
+        });
+</script>
 </html>

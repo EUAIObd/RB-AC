@@ -1,4 +1,11 @@
 # Access Control System for Small Organizations
+**BSCS 3A**
+
+**Submitted by:**
+
+- Eugene P. Aquilino
+- Mary France B. San Andres
+
 
 ## Project Overview
 

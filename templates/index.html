@@ -2,10 +2,11 @@
 
 {% block content %}
     <h1>Welcome to the Access Control App</h1>
-    <div class="d-flex justify-content-center">
-        <a href="{{ url_for('login') }}" class="btn btn-primary mr-2">Login</a>
-        <br>
-        <a href="{{ url_for('signup') }}" class="btn btn-secondary mr-2">Sign Up</a>
-        <a href="{{ url_for('admin_login') }}" class="btn btn-info">Login as Admin</a>
+    <div class="d-flex flex-column justify-content-center">
+        <a href="{{ url_for('login') }}" class="btn btn-primary mb-2 btn-block">Login</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-secondary mb-2 btn-block">Sign Up</a>
+        <hr>
+        <a href="{{ url_for('admin_login') }}" class="btn btn-info btn-block">Login as Admin</a>
     </div>
+    
 {% endblock %}

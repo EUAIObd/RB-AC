@@ -1,30 +1,83 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<div class="profile-container">
     <h2>Your Profile</h2>
-    <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="Profile Picture" width="150" class="mx-auto d-block">
-    <form method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" required>
+
+    <div class="profile-pic">
+        <img src="{{ url_for('static', filename=user.profile_pic) }}" alt="Profile Picture" width="150" class="mx-auto d-block">
+        <button class="btn btn-sm btn-secondary change-pic-btn" type="button">
+            &#128393;
+        </button>
+        <div class="profile-pic-form" id="profile-pic-form">
+            <form method="POST" enctype="multipart/form-data" action="{{ url_for('update_profile_pic') }}">
+                <div class="form-group">
+                    <input type="file" id="profile_pic" name="profile_pic" class="form-control-file">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Change</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
-        </div>
-        <div class="form-group">
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" class="form-control" value="{{ user.address }}">
-        </div>
-        <div class="form-group">
-            <label for="cellphone">Cellphone:</label>
-            <input type="text" id="cellphone" name="cellphone" class="form-control" value="{{ user.cellphone }}">
-        </div>
-        <div class="form-group">
-            <label for="profile_pic">Change Profile Picture:</label>
-            <input type="file" id="profile_pic" name="profile_pic" class="form-control-file">
-        </div>
-        <button type="submit" class="btn btn-primary">Update Profile</button>
-    </form>
+    </div>
+
+    <div class="profile-info">
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Address:</strong> {{ user.address }}</p>
+        <p><strong>Cellphone:</strong> {{ user.cellphone }}</p>
+    </div>
+
+    <button id="edit-profile-btn" class="btn btn-primary">Edit Profile</button>
+
+    <div class="edit-form" id="edit-form" style="display: none;">
+        <form method="POST" action="{{ url_for('profile') }}">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ user.name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" class="form-control" value="{{ user.address }}">
+            </div>
+            <div class="form-group">
+                <label for="cellphone">Cellphone:</label>
+                <input type="text" id="cellphone" name="cellphone" class="form-control" value="{{ user.cellphone }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+<hr>
+    <a href="{{ url_for('change_password') }}" class="btn btn-secondary mt-3">Change Password</a>
     <a href="{{ url_for('logout') }}" class="btn btn-danger mt-3">Logout</a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const editForm = document.getElementById('edit-form');
+        const changePicBtn = document.querySelector('.change-pic-btn');
+        const profilePicForm = document.getElementById('profile-pic-form');
+
+        editProfileBtn.addEventListener('click', function() {
+            if (editForm.style.display === 'none') {
+                editForm.style.display = 'block';
+                editProfileBtn.style.display = 'none'; // Hide the edit button
+            } else {
+                editForm.style.display = 'none';
+                editProfileBtn.style.display = 'block'; // Show the edit button
+            }
+        });
+
+        changePicBtn.addEventListener('click', function() {
+            if (profilePicForm.style.display === 'none') {
+                profilePicForm.style.display = 'block';
+            } else {
+                profilePicForm.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}

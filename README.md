@@ -56,8 +56,6 @@ This project implements a web-based access control system designed for small org
 
 The application follows a modular structure (similar to the Model-View-Controller pattern):
 
-*   **`models.py`:** Defines the database schema using SQLAlchemy models (`User` and `Admin` tables).
-*   **`routes.py` (or combined in `app.py`):** Contains the application logic, including route definitions, user authentication, authorization, and data manipulation.
 *   **`templates/`:** Holds the HTML templates for the user interface.
 *   **`static/`:** Stores static files like CSS, JavaScript, and images (including the default profile picture).
 *   **`create_database_standalone.py` (optional):** A separate script to create the database and tables independently of the Flask app.
